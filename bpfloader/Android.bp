@@ -50,6 +50,7 @@ cc_binary {
 
     required: [
         "timeInState.o",
+        "firewall.o",
     ],
 
     product_variables: {

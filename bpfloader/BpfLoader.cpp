@@ -84,8 +84,27 @@ constexpr bpf_prog_type kVendorAllowedProgTypes[] = {
         BPF_PROG_TYPE_SOCKET_FILTER,
 };
 
+constexpr bpf_prog_type kFirewallAllowedProgTypes[] = {
+        BPF_PROG_TYPE_CGROUP_SKB,
+        BPF_PROG_TYPE_CGROUP_SOCK,
+        BPF_PROG_TYPE_SOCKET_FILTER,
+        BPF_PROG_TYPE_SCHED_ACT,
+};
+
+constexpr unsigned long long kFirewallDomainBitmask =
+        domainToBitmask(domain::net_private) |
+        domainToBitmask(domain::net_shared) |
+        domainToBitmask(domain::netd_readonly) |
+        domainToBitmask(domain::netd_shared);
 
 const android::bpf::Location locations[] = {
+        {
+                .dir = "/system/etc/bpf/netd_shared/",
+                .prefix = "netd_shared/",
+                .allowedDomainBitmask = kFirewallDomainBitmask,
+                .allowedProgTypes = kFirewallAllowedProgTypes,
+                .allowedProgTypesLength = arraysize(kFirewallAllowedProgTypes),
+        },
         // Core operating system
         {
                 .dir = "/system/etc/bpf/",
