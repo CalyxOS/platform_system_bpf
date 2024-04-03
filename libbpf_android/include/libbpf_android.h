@@ -39,15 +39,21 @@ namespace bpf {
 enum class domain : int {
     unrecognized = -1,  // invalid for this version of the bpfloader
     unspecified = 0,    // means just use the default for that specific pin location
-    platform,           //      fs_bpf               /sys/fs/bpf
-    vendor,             // (T+) fs_bpf_vendor        /sys/fs/bpf/vendor
-    loader,             // (U+) fs_bpf_loader        /sys/fs/bpf/loader
+    platform,           //      fs_bpf                    /sys/fs/bpf
+    firewall_private,   // (T+) fs_bpf_firewall_private   /sys/fs/bpf/firewall_private
+    firewall_readonly,  // (T+) fs_bpf_firewall_readonly  /sys/fs/bpf/firewall_readonly
+    firewall_shared,    // (T+) fs_bpf_firewall_shared    /sys/fs/bpf/firewall_shared
+    vendor,             // (T+) fs_bpf_vendor             /sys/fs/bpf/vendor
+    loader,             // (U+) fs_bpf_loader             /sys/fs/bpf/loader
 };
 
 // Note: this does not include domain::unrecognized, but does include domain::unspecified
 static constexpr domain AllDomains[] = {
     domain::unspecified,
     domain::platform,
+    domain::firewall_private,
+    domain::firewall_readonly,
+    domain::firewall_shared,
     domain::vendor,
     domain::loader,
 };

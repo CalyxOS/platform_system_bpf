@@ -91,11 +91,14 @@ static unsigned int page_size = static_cast<unsigned int>(getpagesize());
 
 constexpr const char* lookupSelinuxContext(const domain d, const char* const unspecified = "") {
     switch (d) {
-        case domain::unspecified:   return unspecified;
-        case domain::platform:      return "fs_bpf";
-        case domain::vendor:        return "fs_bpf_vendor";
-        case domain::loader:        return "fs_bpf_loader";
-        default:                    return "(unrecognized)";
+        case domain::unspecified:        return unspecified;
+        case domain::platform:           return "fs_bpf";
+        case domain::firewall_private:   return "fs_bpf_firewall_private";
+        case domain::firewall_readonly:  return "fs_bpf_firewall_readonly";
+        case domain::firewall_shared:    return "fs_bpf_firewall_shared";
+        case domain::vendor:             return "fs_bpf_vendor";
+        case domain::loader:             return "fs_bpf_loader";
+        default:                         return "(unrecognized)";
     }
 }
 
@@ -118,11 +121,14 @@ domain getDomainFromSelinuxContext(const char s[BPF_SELINUX_CONTEXT_CHAR_ARRAY_S
 
 constexpr const char* lookupPinSubdir(const domain d, const char* const unspecified = "") {
     switch (d) {
-        case domain::unspecified:   return unspecified;
-        case domain::platform:      return "/";
-        case domain::vendor:        return "vendor/";
-        case domain::loader:        return "loader/";
-        default:                    return "(unrecognized)";
+        case domain::unspecified:        return unspecified;
+        case domain::platform:           return "/";
+        case domain::firewall_private:   return "firewall_private/";
+        case domain::firewall_readonly:  return "firewall_readonly/";
+        case domain::firewall_shared:    return "firewall_shared/";
+        case domain::vendor:             return "vendor/";
+        case domain::loader:             return "loader/";
+        default:                         return "(unrecognized)";
     }
 };
 
@@ -170,13 +176,38 @@ typedef struct {
  * Instead use the DEFINE_(BPF|XDP)_(PROG|MAP)... & LICENSE/CRITICAL macros.
  */
 sectionType sectionNameTypes[] = {
-        {"kprobe/",        BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
-        {"kretprobe/",     BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
-        {"perf_event/",    BPF_PROG_TYPE_PERF_EVENT,       BPF_ATTACH_TYPE_UNSPEC},
-        {"skfilter/",      BPF_PROG_TYPE_SOCKET_FILTER,    BPF_ATTACH_TYPE_UNSPEC},
-        {"tracepoint/",    BPF_PROG_TYPE_TRACEPOINT,       BPF_ATTACH_TYPE_UNSPEC},
-        {"uprobe/",        BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
-        {"uretprobe/",     BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
+            {"bind4/",         BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_INET4_BIND},
+            {"bind6/",         BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_INET6_BIND},
+            {"cgroupskb/",     BPF_PROG_TYPE_CGROUP_SKB,       BPF_ATTACH_TYPE_UNSPEC},
+            {"cgroupsock/",    BPF_PROG_TYPE_CGROUP_SOCK,      BPF_ATTACH_TYPE_UNSPEC},
+            {"connect4/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_INET4_CONNECT},
+            {"connect6/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_INET6_CONNECT},
+            {"egress/",        BPF_PROG_TYPE_CGROUP_SKB,       BPF_CGROUP_INET_EGRESS},
+            {"getsockopt/",    BPF_PROG_TYPE_CGROUP_SOCKOPT,   BPF_CGROUP_GETSOCKOPT},
+            {"ingress/",       BPF_PROG_TYPE_CGROUP_SKB,       BPF_CGROUP_INET_INGRESS},
+            {"kprobe/",        BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
+            {"kretprobe/",     BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
+            {"lwt_in/",        BPF_PROG_TYPE_LWT_IN,           BPF_ATTACH_TYPE_UNSPEC},
+            {"lwt_out/",       BPF_PROG_TYPE_LWT_OUT,          BPF_ATTACH_TYPE_UNSPEC},
+            {"lwt_seg6local/", BPF_PROG_TYPE_LWT_SEG6LOCAL,    BPF_ATTACH_TYPE_UNSPEC},
+            {"lwt_xmit/",      BPF_PROG_TYPE_LWT_XMIT,         BPF_ATTACH_TYPE_UNSPEC},
+            {"perf_event/",    BPF_PROG_TYPE_PERF_EVENT,       BPF_ATTACH_TYPE_UNSPEC},
+            {"postbind4/",     BPF_PROG_TYPE_CGROUP_SOCK,      BPF_CGROUP_INET4_POST_BIND},
+            {"postbind6/",     BPF_PROG_TYPE_CGROUP_SOCK,      BPF_CGROUP_INET6_POST_BIND},
+            {"recvmsg4/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_UDP4_RECVMSG},
+            {"recvmsg6/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_UDP6_RECVMSG},
+            {"schedact/",      BPF_PROG_TYPE_SCHED_ACT,        BPF_ATTACH_TYPE_UNSPEC},
+            {"schedcls/",      BPF_PROG_TYPE_SCHED_CLS,        BPF_ATTACH_TYPE_UNSPEC},
+            {"sendmsg4/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_UDP4_SENDMSG},
+            {"sendmsg6/",      BPF_PROG_TYPE_CGROUP_SOCK_ADDR, BPF_CGROUP_UDP6_SENDMSG},
+            {"setsockopt/",    BPF_PROG_TYPE_CGROUP_SOCKOPT,   BPF_CGROUP_SETSOCKOPT},
+            {"skfilter/",      BPF_PROG_TYPE_SOCKET_FILTER,    BPF_ATTACH_TYPE_UNSPEC},
+            {"sockops/",       BPF_PROG_TYPE_SOCK_OPS,         BPF_CGROUP_SOCK_OPS},
+            {"sysctl",         BPF_PROG_TYPE_CGROUP_SYSCTL,    BPF_CGROUP_SYSCTL},
+            {"tracepoint/",    BPF_PROG_TYPE_TRACEPOINT,       BPF_ATTACH_TYPE_UNSPEC},
+            {"uprobe/",        BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
+            {"uretprobe/",     BPF_PROG_TYPE_KPROBE,           BPF_ATTACH_TYPE_UNSPEC},
+            {"xdp/",           BPF_PROG_TYPE_XDP,              BPF_ATTACH_TYPE_UNSPEC},
 };
 
 typedef struct {

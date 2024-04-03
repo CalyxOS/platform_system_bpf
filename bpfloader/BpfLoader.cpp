@@ -84,8 +84,40 @@ constexpr bpf_prog_type kVendorAllowedProgTypes[] = {
         BPF_PROG_TYPE_SOCKET_FILTER,
 };
 
+constexpr bpf_prog_type kFirewallAllowedProgTypes[] = {
+        BPF_PROG_TYPE_CGROUP_SKB,
+        BPF_PROG_TYPE_CGROUP_SOCK,
+        BPF_PROG_TYPE_SOCKET_FILTER,
+        BPF_PROG_TYPE_SCHED_ACT,
+};
+
+constexpr unsigned long long kFirewallDomainBitmask =
+        domainToBitmask(domain::firewall_private) |
+        domainToBitmask(domain::firewall_readonly) |
+        domainToBitmask(domain::firewall_shared);
 
 const android::bpf::Location locations[] = {
+        {
+                .dir = "/system/etc/bpf/firewall_private/",
+                .prefix = "firewall_private/",
+                .allowedDomainBitmask = kFirewallDomainBitmask,
+                .allowedProgTypes = kFirewallAllowedProgTypes,
+                .allowedProgTypesLength = arraysize(kFirewallAllowedProgTypes),
+        },
+        {
+                .dir = "/system/etc/bpf/firewall_readonly/",
+                .prefix = "firewall_readonly/",
+                .allowedDomainBitmask = kFirewallDomainBitmask,
+                .allowedProgTypes = kFirewallAllowedProgTypes,
+                .allowedProgTypesLength = arraysize(kFirewallAllowedProgTypes),
+        },
+        {
+                .dir = "/system/etc/bpf/firewall_shared/",
+                .prefix = "firewall_shared/",
+                .allowedDomainBitmask = kFirewallDomainBitmask,
+                .allowedProgTypes = kFirewallAllowedProgTypes,
+                .allowedProgTypesLength = arraysize(kFirewallAllowedProgTypes),
+        },
         // Core operating system
         {
                 .dir = "/system/etc/bpf/",
